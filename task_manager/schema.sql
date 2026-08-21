@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS task;
+
+CREATE TABLE task (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    is_completed INTEGER NOT NULL DEFAULT 0 CHECK (is_completed IN (0, 1)),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_task_is_completed ON task (is_completed);
