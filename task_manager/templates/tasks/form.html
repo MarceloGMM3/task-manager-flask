@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% set is_editing = task is not none %}
+{% block title %}{{ "Editar" if is_editing else "Nueva" }} tarea | Gestor de tareas{% endblock %}
+
+{% block content %}
+  <h1>{{ "Editar tarea" if is_editing else "Nueva tarea" }}</h1>
+  <form class="task-form" method="post">
+    <label for="title">Título</label>
+    <input
+      id="title"
+      name="title"
+      type="text"
+      required
+      autofocus
+      value="{{ request.form.get('title', task['title'] if task else '') }}"
+    >
+
+    <label for="description">Descripción</label>
+    <textarea id="description" name="description" rows="5">{{ request.form.get('description', task['description'] if task else '') }}</textarea>
+
+    <div class="form-actions">
+      <button type="submit">Guardar</button>
+      <a class="button button-secondary" href="{{ url_for('tasks.index') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

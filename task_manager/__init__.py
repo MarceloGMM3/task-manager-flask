@@ -6,6 +6,7 @@ from flask import Flask
 
 from task_manager.config import Config
 from task_manager.db import init_app as init_db_app
+from task_manager.tasks import bp as tasks_bp
 
 
 def create_app(test_config: dict[str, object] | None = None) -> Flask:
@@ -18,5 +19,6 @@ def create_app(test_config: dict[str, object] | None = None) -> Flask:
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     init_db_app(app)
+    app.register_blueprint(tasks_bp)
 
     return app

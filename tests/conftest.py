@@ -3,8 +3,10 @@ from pathlib import Path
 
 import pytest
 from flask import Flask
+from flask.testing import FlaskClient
 
 from task_manager import create_app
+from task_manager.db import init_db
 
 
 @pytest.fixture
@@ -18,4 +20,12 @@ def app(tmp_path: Path) -> Iterator[Flask]:
         }
     )
 
+    with application.app_context():
+        init_db()
+
     yield application
+
+
+@pytest.fixture
+def client(app: Flask) -> FlaskClient:
+    return app.test_client()
