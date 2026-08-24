@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Página no encontrada | Gestor de tareas{% endblock %}
+
+{% block content %}
+  <section class="empty-state">
+    <h1>Página no encontrada</h1>
+    <p>La página o tarea solicitada no existe.</p>
+    <a class="button" href="{{ url_for('tasks.index') }}">Volver a las tareas</a>
+  </section>
+{% endblock %}

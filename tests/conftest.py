@@ -1,4 +1,5 @@
-from collections.abc import Iterator
+import re
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -29,3 +30,17 @@ def app(tmp_path: Path) -> Iterator[Flask]:
 @pytest.fixture
 def client(app: Flask) -> FlaskClient:
     return app.test_client()
+
+
+@pytest.fixture
+def csrf_token(client: FlaskClient) -> Callable[[str], str]:
+    """Return a helper that obtains a genuine CSRF token from a form."""
+
+    def get_token(path: str = "/tasks/create") -> str:
+        response = client.get(path)
+        match = re.search(rb'name="csrf_token"[^>]*value="([^"]+)"', response.data)
+        if match is None:
+            raise AssertionError("Rendered form did not contain a CSRF token")
+        return match.group(1).decode()
+
+    return get_token
