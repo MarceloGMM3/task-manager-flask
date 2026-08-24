@@ -6,6 +6,7 @@
 {% block content %}
   <h1>{{ "Editar tarea" if is_editing else "Nueva tarea" }}</h1>
   <form class="task-form" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="title">Título</label>
     <input
       id="title"

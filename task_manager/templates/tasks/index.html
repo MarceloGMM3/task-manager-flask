@@ -22,12 +22,14 @@
           </div>
           <div class="task-actions">
             <form method="post" action="{{ url_for('tasks.toggle', task_id=task['id']) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit">
                 {{ "Marcar pendiente" if task["is_completed"] else "Completar" }}
               </button>
             </form>
             <a class="button button-secondary" href="{{ url_for('tasks.edit', task_id=task['id']) }}">Editar</a>
             <form method="post" action="{{ url_for('tasks.delete', task_id=task['id']) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="button-danger" type="submit">Eliminar</button>
             </form>
           </div>
