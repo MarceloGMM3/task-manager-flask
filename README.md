@@ -1,5 +1,7 @@
 # task-manager-flask
 
+[![CI](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml/badge.svg)](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml)
+
 Aplicación web de gestión de tareas construida con Python, Flask y SQLite. El
 proyecto prioriza una arquitectura clara, persistencia explícita, seguridad básica,
 pruebas automatizadas y automatización de calidad mediante GitHub Actions.
@@ -12,6 +14,7 @@ pruebas automatizadas y automatización de calidad mediante GitHub Actions.
 - Eliminar tareas mediante formularios `POST`.
 - Proteger todas las operaciones mutativas mediante tokens CSRF.
 - Mostrar páginas personalizadas para errores HTTP 404 y 500.
+- Ofrecer una interfaz responsive con navegación por teclado y estados accesibles.
 
 ## Stack tecnológico
 
@@ -173,7 +176,7 @@ sencilla; una ejecución marcada explícitamente como producción exige una
 - No existe API REST.
 - `init-db` recrea el esquema y debe utilizarse solo para inicialización local.
 - No hay migraciones, contenedores ni despliegue cloud configurado.
-- La interfaz es deliberadamente mínima.
+- La interfaz se mantiene ligera y sin framework CSS ni JavaScript complejo.
 
 ## Roadmap
 

@@ -18,6 +18,49 @@ def test_index_lists_tasks(app: Flask, client: FlaskClient) -> None:
     assert b"Descripci\xc3\xb3n visible" in response.data
 
 
+def test_empty_state_guides_user_to_create_task(client: FlaskClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b"Todav\xc3\xada no hay tareas" in response.data
+    assert b"Crear mi primera tarea" in response.data
+    assert b'href="/tasks/create"' in response.data
+
+
+def test_create_form_contains_accessible_fields_and_csrf(client: FlaskClient) -> None:
+    response = client.get("/tasks/create")
+
+    assert response.status_code == 200
+    assert b'<label for="title">' in response.data
+    assert b'<label for="description">' in response.data
+    assert b'id="title"' in response.data
+    assert b"required" in response.data
+    assert b'aria-describedby="title-help"' in response.data
+    assert b'name="csrf_token"' in response.data
+    assert b"Guardar tarea" in response.data
+
+
+def test_index_distinguishes_pending_and_completed_tasks(
+    app: Flask, client: FlaskClient
+) -> None:
+    with app.app_context():
+        pending_id = repository.create_task("Pendiente visible")
+        completed_id = repository.create_task("Completada visible")
+        repository.set_task_completed(completed_id, True)
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b"status-pending" in response.data
+    assert b"Pendiente" in response.data
+    assert b"status-completed" in response.data
+    assert b"Completada" in response.data
+    assert b"task-completed" in response.data
+    assert f"/tasks/{pending_id}/toggle".encode() in response.data
+    assert b'onsubmit="return confirm(' in response.data
+    assert "¿Eliminar esta tarea de forma permanente?".encode() in response.data
+
+
 def test_create_task(
     app: Flask, client: FlaskClient, csrf_token: Callable[[], str]
 ) -> None:
@@ -52,6 +95,8 @@ def test_create_requires_title(
 
     assert response.status_code == 400
     assert b"El t\xc3\xadtulo es obligatorio." in response.data
+    assert b'aria-invalid="true"' in response.data
+    assert b'id="title-error"' in response.data
     with app.app_context():
         assert repository.list_tasks() == []
 

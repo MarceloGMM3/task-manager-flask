@@ -4,8 +4,9 @@
 
 {% block content %}
   <section class="empty-state">
+    <p class="eyebrow">Error 404</p>
     <h1>Página no encontrada</h1>
     <p>La página o tarea solicitada no existe.</p>
-    <a class="button" href="{{ url_for('tasks.index') }}">Volver a las tareas</a>
+    <a class="button button-primary" href="{{ url_for('tasks.index') }}">Volver a las tareas</a>
   </section>
 {% endblock %}

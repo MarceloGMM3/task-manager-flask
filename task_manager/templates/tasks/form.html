@@ -4,24 +4,37 @@
 {% block title %}{{ "Editar" if is_editing else "Nueva" }} tarea | Gestor de tareas{% endblock %}
 
 {% block content %}
-  <h1>{{ "Editar tarea" if is_editing else "Nueva tarea" }}</h1>
-  <form class="task-form" method="post">
+  <header class="form-heading">
+    <p class="eyebrow">{{ "Actualizar tarea" if is_editing else "Nueva tarea" }}</p>
+    <h1>{{ "Editar tarea" if is_editing else "Crear una tarea" }}</h1>
+    <p class="form-description">El título es obligatorio. La descripción es opcional.</p>
+  </header>
+  <form class="task-form surface" method="post" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="title">Título</label>
-    <input
-      id="title"
-      name="title"
-      type="text"
-      required
-      autofocus
-      value="{{ request.form.get('title', task['title'] if task else '') }}"
-    >
+    <div class="form-field">
+      <label for="title">Título <span aria-hidden="true">*</span></label>
+      <p class="field-help" id="title-help">Describe brevemente qué necesitas hacer.</p>
+      <input
+        id="title"
+        name="title"
+        type="text"
+        required
+        autofocus
+        aria-describedby="title-help{% if error %} title-error{% endif %}"
+        {% if error %}aria-invalid="true"{% endif %}
+        value="{{ request.form.get('title', task['title'] if task else '') }}"
+      >
+      {% if error %}<p class="field-error" id="title-error">{{ error }}</p>{% endif %}
+    </div>
 
-    <label for="description">Descripción</label>
-    <textarea id="description" name="description" rows="5">{{ request.form.get('description', task['description'] if task else '') }}</textarea>
+    <div class="form-field">
+      <label for="description">Descripción <span class="optional">(opcional)</span></label>
+      <p class="field-help" id="description-help">Añade contexto o detalles útiles.</p>
+      <textarea id="description" name="description" rows="5" aria-describedby="description-help">{{ request.form.get('description', task['description'] if task else '') }}</textarea>
+    </div>
 
     <div class="form-actions">
-      <button type="submit">Guardar</button>
+      <button class="button button-primary" type="submit">Guardar tarea</button>
       <a class="button button-secondary" href="{{ url_for('tasks.index') }}">Cancelar</a>
     </div>
   </form>
