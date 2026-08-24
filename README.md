@@ -5,9 +5,8 @@ con enfoque en buenas prácticas, pruebas y documentación.
 
 ## Estado
 
-El proyecto se encuentra en su etapa inicial. Por ahora incluye la fábrica de la
-aplicación, configuración básica, conexión SQLite, esquema inicial y pruebas de
-infraestructura. El CRUD de tareas todavía no está implementado.
+El proyecto incluye la fábrica de la aplicación, configuración básica, conexión
+SQLite, esquema inicial y las operaciones CRUD de tareas con pruebas automatizadas.
 
 ## Desarrollo local
 
@@ -27,3 +26,9 @@ python -m pytest
 ruff check .
 ruff format --check .
 ```
+
+## Limitaciones actuales
+
+- Todavía no hay protección CSRF.
+- Todas las operaciones mutativas utilizan solicitudes `POST`.
+- La protección CSRF se abordará antes de considerar un despliegue de producción.

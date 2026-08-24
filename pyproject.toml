@@ -23,6 +23,9 @@ dev = [
 addopts = "--strict-markers --strict-config"
 testpaths = ["tests"]
 
+[tool.coverage.run]
+source = ["task_manager"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py311"

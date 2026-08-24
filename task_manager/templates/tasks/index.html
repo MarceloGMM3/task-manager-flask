@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Tareas | Gestor de tareas{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <h1>Tareas</h1>
+      <p>Organiza el trabajo pendiente y registra lo completado.</p>
+    </div>
+    <a class="button" href="{{ url_for('tasks.create') }}">Nueva tarea</a>
+  </div>
+
+  {% if tasks %}
+    <ul class="task-list">
+      {% for task in tasks %}
+        <li class="task-card{% if task['is_completed'] %} task-completed{% endif %}">
+          <div class="task-content">
+            <h2>{{ task["title"] }}</h2>
+            {% if task["description"] %}<p>{{ task["description"] }}</p>{% endif %}
+            <span>{{ "Completada" if task["is_completed"] else "Pendiente" }}</span>
+          </div>
+          <div class="task-actions">
+            <form method="post" action="{{ url_for('tasks.toggle', task_id=task['id']) }}">
+              <button type="submit">
+                {{ "Marcar pendiente" if task["is_completed"] else "Completar" }}
+              </button>
+            </form>
+            <a class="button button-secondary" href="{{ url_for('tasks.edit', task_id=task['id']) }}">Editar</a>
+            <form method="post" action="{{ url_for('tasks.delete', task_id=task['id']) }}">
+              <button class="button-danger" type="submit">Eliminar</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state">
+      <h2>No hay tareas todavía</h2>
+      <p>Crea la primera tarea para comenzar.</p>
+    </div>
+  {% endif %}
+{% endblock %}
