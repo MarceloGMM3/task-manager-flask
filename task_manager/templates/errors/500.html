@@ -4,8 +4,9 @@
 
 {% block content %}
   <section class="empty-state">
+    <p class="eyebrow">Error 500</p>
     <h1>Algo salió mal</h1>
     <p>No pudimos completar la solicitud. Inténtalo nuevamente más tarde.</p>
-    <a class="button" href="{{ url_for('tasks.index') }}">Volver a las tareas</a>
+    <a class="button button-primary" href="{{ url_for('tasks.index') }}">Volver a las tareas</a>
   </section>
 {% endblock %}

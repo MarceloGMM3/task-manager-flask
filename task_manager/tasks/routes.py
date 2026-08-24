@@ -18,7 +18,11 @@ def create() -> str:
         title, description = _task_form_values()
         if not title:
             flash("El título es obligatorio.", "error")
-            return render_template("tasks/form.html", task=None), 400
+            return render_template(
+                "tasks/form.html",
+                task=None,
+                error="El título es obligatorio.",
+            ), 400
 
         repository.create_task(title, description)
         flash("Tarea creada correctamente.", "success")
@@ -35,7 +39,11 @@ def edit(task_id: int) -> str:
         title, description = _task_form_values()
         if not title:
             flash("El título es obligatorio.", "error")
-            return render_template("tasks/form.html", task=task), 400
+            return render_template(
+                "tasks/form.html",
+                task=task,
+                error="El título es obligatorio.",
+            ), 400
 
         repository.update_task(task_id, title, description)
         flash("Tarea actualizada correctamente.", "success")

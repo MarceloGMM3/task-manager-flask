@@ -7,14 +7,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
     <header class="site-header">
-      <a href="{{ url_for('tasks.index') }}">Gestor de tareas</a>
+      <div class="header-content">
+        <a class="brand" href="{{ url_for('tasks.index') }}">Gestor de tareas</a>
+        <span class="brand-description">Organiza tu trabajo con claridad</span>
+      </div>
     </header>
-    <main class="container">
+    <main class="container" id="main-content" tabindex="-1">
       {% for category, message in get_flashed_messages(with_categories=true) %}
-        <p class="flash flash-{{ category }}">{{ message }}</p>
+        <p class="flash flash-{{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">
+          {{ message }}
+        </p>
       {% endfor %}
       {% block content %}{% endblock %}
     </main>
+    <footer class="site-footer">
+      <p>Task Manager · Flask y SQLite</p>
+    </footer>
   </body>
 </html>
