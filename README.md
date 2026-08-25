@@ -47,6 +47,9 @@ task_manager/
 ├── config.py
 ├── db.py
 ├── errors.py
+├── migrations.py
+├── migrations/
+│   └── 0001_optimize_task_listing.sql
 ├── schema.sql
 ├── static/css/styles.css
 ├── tasks/
@@ -110,13 +113,41 @@ export APP_ENV="production"
 Cuando `APP_ENV=production`, la aplicación falla al iniciar si `SECRET_KEY` está
 ausente, vacía o conserva el valor local inseguro `dev`.
 
-## Inicialización y ejecución
+## Inicialización, migraciones y ejecución
 
-Inicializa la base SQLite local:
+Para crear una base nueva con el esquema actual, usa `init-db`:
 
 ```bash
 python -m flask --app wsgi init-db
 ```
+
+`init-db` es un comando destructivo: elimina y recrea las tablas. Está destinado
+exclusivamente a inicializar o reiniciar una base de desarrollo y no debe usarse
+para actualizar una base que contenga datos que deban conservarse.
+
+Para actualizar de forma segura una base existente, ejecuta:
+
+```bash
+python -m flask --app wsgi upgrade-db
+```
+
+`upgrade-db` crea la tabla de control `schema_migrations` si aún no existe,
+descubre los archivos SQL de `task_manager/migrations/` por su identificador
+ordenable y aplica únicamente los pendientes. Cada migración y su registro se
+confirman en la misma transacción. Repetir el comando es seguro: si no hay cambios
+pendientes, informa que la base ya está actualizada.
+
+Los archivos deben numerarse consecutivamente desde `0001`, sin duplicados ni
+saltos, y contener SQL deliberadamente simple que pueda ejecutarse sentencia por
+sentencia con el analizador de completitud incluido en `sqlite3`. Al añadir una
+migración futura deben coordinarse tres cambios: incorporar el nuevo archivo SQL,
+actualizar `schema.sql` al estado final y registrar esa versión en el baseline de
+`schema_migrations` usado por instalaciones nuevas.
+
+La primera migración versionada, `0001_optimize_task_listing`, reemplaza el índice
+inicial por uno compuesto que respalda el orden real del listado de tareas. No
+reescribe registros. `created_at` ya formaba parte del esquema publicado antes de
+incorporar este sistema, por lo que se conserva sin alteraciones.
 
 Inicia el servidor de desarrollo:
 
@@ -166,7 +197,11 @@ sencilla; una ejecución marcada explícitamente como producción exige una
 - Se mantiene `sqlite3` nativo para hacer explícito el ciclo de conexión y las
   transacciones.
 - El SQL vive exclusivamente en la capa de repositorio y usa placeholders `?`.
-- `schema.sql` inicializa la versión actual; aún no existe un sistema de migraciones.
+- `schema.sql` crea de forma destructiva una base nueva en la versión actual;
+  `upgrade-db` evoluciona bases existentes sin eliminar sus datos.
+- Las migraciones son SQL explícito, versionado y forward-only. Ante un fallo se
+  revierte la migración activa y no se registra como aplicada; la corrección se
+  entrega mediante una nueva migración, sin rollback automático.
 - Las operaciones mutativas usan `POST` y HTML tradicional, sin JavaScript complejo.
 - Los errores 404 y 500 comparten la presentación base de la aplicación.
 
@@ -175,12 +210,13 @@ sencilla; una ejecución marcada explícitamente como producción exige una
 - No hay autenticación ni separación de tareas por usuario.
 - No existe API REST.
 - `init-db` recrea el esquema y debe utilizarse solo para inicialización local.
-- No hay migraciones, contenedores ni despliegue cloud configurado.
+- No hay rollback automático de migraciones.
+- No hay contenedores ni despliegue cloud configurado.
 - La interfaz se mantiene ligera y sin framework CSS ni JavaScript complejo.
 
 ## Roadmap
 
-- Incorporar migraciones cuando el esquema necesite evolucionar.
+- Ampliar el historial de migraciones a medida que el esquema evolucione.
 - Mejorar accesibilidad y experiencia visual sin alterar la arquitectura.
 - Definir una estrategia de despliegue y configuración de producción.
 - Evaluar autenticación únicamente si el alcance futuro lo requiere.

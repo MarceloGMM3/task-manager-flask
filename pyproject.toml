@@ -26,6 +26,12 @@ dev = [
 addopts = "--strict-markers --strict-config"
 testpaths = ["tests"]
 
+[tool.setuptools.package-data]
+task_manager = ["schema.sql", "migrations/*.sql"]
+
+[tool.setuptools.packages.find]
+include = ["task_manager*"]
+
 [tool.coverage.run]
 source = ["task_manager"]
 
