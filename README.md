@@ -1,79 +1,120 @@
-# task-manager-flask
+# Task Manager Flask
 
-[![CI](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml/badge.svg)](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml)
+[![CI](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MarceloGMM3/task-manager-flask/actions/workflows/ci.yml)
 
-Aplicación web de gestión de tareas construida con Python, Flask y SQLite. El
-proyecto prioriza una arquitectura clara, persistencia explícita, seguridad básica,
-pruebas automatizadas y automatización de calidad mediante GitHub Actions.
+Aplicación web de gestión de tareas desarrollada como proyecto de portafolio con
+una arquitectura Flask modular, persistencia SQLite explícita y un flujo de calidad
+automatizado. El proyecto prioriza código auditable, pruebas aisladas, seguridad
+básica y una interfaz accesible sin ampliar innecesariamente el stack.
 
-## Funcionalidades
+**Python · Flask · SQLite · Pytest · GitHub Actions**
 
-- Listar tareas pendientes y completadas.
-- Crear y editar tareas con validación de título obligatorio.
-- Marcar tareas como completadas o pendientes.
-- Eliminar tareas mediante formularios `POST`.
-- Proteger todas las operaciones mutativas mediante tokens CSRF.
-- Mostrar páginas personalizadas para errores HTTP 404 y 500.
-- Ofrecer una interfaz responsive con navegación por teclado y estados accesibles.
+- **45 pruebas automatizadas** y **97 % de cobertura**.
+- Integración continua para pruebas, cobertura, lint y formato.
+- Protección CSRF en todas las operaciones mutativas.
+- Migraciones SQLite versionadas, transaccionales e idempotentes.
+- Interfaz responsive con criterios de accesibilidad y navegación por teclado.
 
-## Stack tecnológico
+## Vista de la aplicación
 
-- Python 3.11 o superior.
-- Flask y Flask-WTF.
-- SQLite mediante el módulo `sqlite3` de la biblioteca estándar.
-- Jinja, HTML y CSS sin frameworks JavaScript.
-- pytest, pytest-cov y Ruff.
-- GitHub Actions para integración continua.
+La captura principal del flujo de tareas se incorporará cuando esté disponible. El
+README está preparado para alojarla en `docs/images/task-manager-preview.png` sin
+mantener mientras tanto un recurso visual roto.
+
+## Características
+
+- Listado de tareas pendientes y completadas, con estados visuales y textuales.
+- Creación y edición con normalización y validación de título obligatorio.
+- Cambio de estado entre pendiente y completada.
+- Eliminación mediante `POST` con confirmación previa en el navegador.
+- Estado vacío, mensajes de confirmación y páginas personalizadas 404 y 500.
+- Diseño adaptable a escritorio, tablet y móvil.
+- Formularios con labels asociados, mensajes accesibles, foco visible y skip link.
 
 ## Arquitectura
 
-La aplicación utiliza Application Factory y Blueprints. El flujo del módulo de
-tareas es:
+La aplicación utiliza **Application Factory** y un **Blueprint** para el dominio de
+tareas. La separación principal es:
 
 ```text
 HTTP → routes.py → repository.py → SQLite
 ```
 
-Las rutas gestionan solicitudes, validación y respuestas HTTP. El repositorio
-concentra las consultas SQL parametrizadas y controla `commit` y `rollback`. La
-conexión SQLite se almacena en `flask.g`, utiliza `sqlite3.Row`, activa claves
-foráneas y se cierra automáticamente al terminar el contexto de aplicación.
+- `routes.py` procesa solicitudes, validación de formularios y respuestas HTTP.
+- `repository.py` concentra las operaciones de persistencia y el SQL parametrizado.
+- `db.py` administra una conexión SQLite por contexto mediante `flask.g`, activa
+  claves foráneas y cierra automáticamente la conexión.
+- `migrations.py` descubre y ejecuta evoluciones versionadas del esquema.
 
-## Estructura principal
+Esta división mantiene la lógica HTTP separada del acceso a datos sin incorporar
+un ORM para el alcance actual.
 
-```text
-task_manager/
-├── __init__.py
-├── config.py
-├── db.py
-├── errors.py
-├── migrations.py
-├── migrations/
-│   └── 0001_optimize_task_listing.sql
-├── schema.sql
-├── static/css/styles.css
-├── tasks/
-│   ├── __init__.py
-│   ├── repository.py
-│   └── routes.py
-└── templates/
-    ├── base.html
-    ├── errors/
-    └── tasks/
-tests/
-├── tasks/
-├── conftest.py
-├── test_app.py
-├── test_db.py
-└── test_errors.py
+## Tecnologías
+
+| Área | Tecnología |
+| --- | --- |
+| Backend | Python 3.11+, Flask 3, Jinja |
+| Persistencia | SQLite y `sqlite3` nativo |
+| Seguridad de formularios | Flask-WTF / CSRFProtect |
+| Frontend | HTML semántico y CSS nativo |
+| Pruebas | pytest y pytest-cov |
+| Calidad | Ruff |
+| Automatización | GitHub Actions |
+
+## Seguridad
+
+- Flask-WTF aplica protección CSRF global y los formularios `POST` incluyen tokens.
+- Todas las consultas que reciben valores dinámicos usan placeholders `?`.
+- Las escrituras realizan `commit` explícito y `rollback` ante errores SQLite.
+- En una configuración marcada como producción, la aplicación exige una
+  `SECRET_KEY` explícita y rechaza el valor local `dev`.
+- Las bases locales, `.env` y entornos virtuales están excluidos de Git.
+
+Son controles acordes con una aplicación de portafolio; no representan por sí
+solos una estrategia completa de seguridad o despliegue en producción.
+
+## Migraciones de base de datos
+
+Las migraciones son archivos SQL con nombres `NNNN_descripcion.sql`. La tabla
+`schema_migrations` registra las versiones aplicadas y permite que `upgrade-db`
+ejecute únicamente las pendientes, en orden y una sola vez.
+
+Cada migración usa una transacción explícita: el DDL y el registro de versión se
+confirman juntos, o se revierten ante un error. La estrategia es **forward-only** y
+preserva los registros existentes.
+
+```bash
+python -m flask --app wsgi upgrade-db
 ```
+
+- `init-db` crea o reinicia de forma destructiva una base de desarrollo con el
+  esquema actual.
+- `upgrade-db` actualiza una base existente sin reinicializar sus datos.
+
+No debe utilizarse `init-db` para actualizar una base cuyos datos deban conservarse.
+
+## Pruebas y calidad
+
+La suite contiene **45 pruebas automatizadas** y mantiene **97 % de cobertura**.
+Incluye casos de rutas, repositorio, CSRF, configuración, errores HTTP, conexión a
+SQLite y migraciones, incluidos orden, idempotencia y rollback ante fallos.
+
+GitHub Actions se ejecuta en cada push y Pull Request hacia `main` con Python 3.11.
+La CI instala las dependencias de desarrollo, exige al menos 85 % de cobertura y
+ejecuta las verificaciones de Ruff.
 
 ## Instalación
 
-Clona el repositorio, crea un entorno virtual e instala el proyecto con sus
-dependencias de desarrollo:
+Requisitos:
+
+- Python 3.11 o superior.
+- Git.
+
+Clona el repositorio y entra al directorio:
 
 ```bash
+git clone https://github.com/MarceloGMM3/task-manager-flask.git
+cd task-manager-flask
 python -m venv .venv
 ```
 
@@ -82,6 +123,7 @@ En Windows PowerShell:
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
+$env:SECRET_KEY = "reemplazar-por-un-valor-aleatorio"
 ```
 
 En macOS o Linux:
@@ -89,65 +131,18 @@ En macOS o Linux:
 ```bash
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
+export SECRET_KEY="reemplazar-por-un-valor-aleatorio"
 ```
 
-Usa `.env.example` como referencia y define `SECRET_KEY` con un valor aleatorio y
-privado directamente en el entorno. Por ejemplo, en PowerShell:
-
-```powershell
-$env:SECRET_KEY = "reemplazar-por-un-valor-seguro"
-```
-
-En macOS o Linux:
-
-```bash
-export SECRET_KEY="reemplazar-por-un-valor-seguro"
-```
-
-Para una ejecución de producción también debes seleccionar el entorno explícito:
-
-```bash
-export APP_ENV="production"
-```
-
-Cuando `APP_ENV=production`, la aplicación falla al iniciar si `SECRET_KEY` está
-ausente, vacía o conserva el valor local inseguro `dev`.
-
-## Inicialización, migraciones y ejecución
-
-Para crear una base nueva con el esquema actual, usa `init-db`:
+Inicializa una base local nueva:
 
 ```bash
 python -m flask --app wsgi init-db
 ```
 
-`init-db` es un comando destructivo: elimina y recrea las tablas. Está destinado
-exclusivamente a inicializar o reiniciar una base de desarrollo y no debe usarse
-para actualizar una base que contenga datos que deban conservarse.
+La base se almacena bajo `instance/` y no se versiona.
 
-Para actualizar de forma segura una base existente, ejecuta:
-
-```bash
-python -m flask --app wsgi upgrade-db
-```
-
-`upgrade-db` crea la tabla de control `schema_migrations` si aún no existe,
-descubre los archivos SQL de `task_manager/migrations/` por su identificador
-ordenable y aplica únicamente los pendientes. Cada migración y su registro se
-confirman en la misma transacción. Repetir el comando es seguro: si no hay cambios
-pendientes, informa que la base ya está actualizada.
-
-Los archivos deben numerarse consecutivamente desde `0001`, sin duplicados ni
-saltos, y contener SQL deliberadamente simple que pueda ejecutarse sentencia por
-sentencia con el analizador de completitud incluido en `sqlite3`. Al añadir una
-migración futura deben coordinarse tres cambios: incorporar el nuevo archivo SQL,
-actualizar `schema.sql` al estado final y registrar esa versión en el baseline de
-`schema_migrations` usado por instalaciones nuevas.
-
-La primera migración versionada, `0001_optimize_task_listing`, reemplaza el índice
-inicial por uno compuesto que respalda el orden real del listado de tareas. No
-reescribe registros. `created_at` ya formaba parte del esquema publicado antes de
-incorporar este sistema, por lo que se conserva sin alteraciones.
+## Ejecución
 
 Inicia el servidor de desarrollo:
 
@@ -155,68 +150,103 @@ Inicia el servidor de desarrollo:
 python -m flask --app wsgi run --debug
 ```
 
-La base se crea dentro de `instance/` y no se versiona.
+Flask mostrará en la terminal la dirección local de la aplicación.
 
-## Pruebas y calidad
+## Pruebas
 
-Ejecuta la suite:
+Ejecuta la suite completa:
 
 ```bash
 python -m pytest
 ```
 
-Mide cobertura y exige localmente el mismo mínimo de CI:
+Mide cobertura y aplica el mismo umbral mínimo de CI:
 
 ```bash
-python -m pytest --cov --cov-fail-under=85
+python -m pytest --cov=task_manager --cov-fail-under=85
 ```
 
-Ejecuta lint y verificación de formato:
+Comprueba lint y formato:
 
 ```bash
 ruff check .
 ruff format --check .
 ```
 
-## Integración continua
+## Estructura del proyecto
 
-El workflow `.github/workflows/ci.yml` se ejecuta en cada push y Pull Request
-hacia `main`. Instala Python 3.11 y las dependencias de desarrollo, ejecuta pytest,
-exige una cobertura mínima del 85% y valida lint y formato con Ruff.
-
-## Seguridad CSRF
-
-`Flask-WTF` registra protección CSRF global. Cada formulario mutativo incluye un
-token asociado a la sesión y las solicitudes sin token o con un token inválido se
-rechazan antes de llegar a las rutas. Desarrollo conserva una configuración local
-sencilla; una ejecución marcada explícitamente como producción exige una
-`SECRET_KEY` segura y falla durante el arranque si no la recibe.
+```text
+task-manager-flask/
+├── .github/workflows/ci.yml
+├── task_manager/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── db.py
+│   ├── errors.py
+│   ├── migrations.py
+│   ├── migrations/
+│   │   └── 0001_optimize_task_listing.sql
+│   ├── schema.sql
+│   ├── static/css/styles.css
+│   ├── tasks/
+│   │   ├── repository.py
+│   │   └── routes.py
+│   └── templates/
+│       ├── base.html
+│       ├── errors/
+│       └── tasks/
+├── tests/
+│   ├── tasks/
+│   ├── conftest.py
+│   ├── test_app.py
+│   ├── test_db.py
+│   ├── test_errors.py
+│   └── test_migrations.py
+├── pyproject.toml
+└── wsgi.py
+```
 
 ## Decisiones técnicas
 
-- Se mantiene `sqlite3` nativo para hacer explícito el ciclo de conexión y las
-  transacciones.
-- El SQL vive exclusivamente en la capa de repositorio y usa placeholders `?`.
-- `schema.sql` crea de forma destructiva una base nueva en la versión actual;
-  `upgrade-db` evoluciona bases existentes sin eliminar sus datos.
-- Las migraciones son SQL explícito, versionado y forward-only. Ante un fallo se
-  revierte la migración activa y no se registra como aplicada; la corrección se
-  entrega mediante una nueva migración, sin rollback automático.
-- Las operaciones mutativas usan `POST` y HTML tradicional, sin JavaScript complejo.
-- Los errores 404 y 500 comparten la presentación base de la aplicación.
+- **Flask modular:** Application Factory y Blueprints permiten separar arranque,
+  configuración y dominio sin añadir capas innecesarias.
+- **SQLite sin ORM:** conserva SQL explícito y facilita evaluar consultas,
+  transacciones y ciclo de conexión en un proyecto de esta escala.
+- **Migraciones ligeras propias:** mantienen el historial SQL visible y evitan
+  introducir una herramienta mayor para un esquema pequeño.
+- **Pruebas y CI:** verifican comportamiento, seguridad básica y calidad en cada
+  cambio dirigido a `main`.
+- **CSS nativo y accesibilidad:** ofrecen una interfaz ligera, responsive y usable
+  por teclado sin depender de frameworks frontend.
+
+Estas decisiones responden al alcance educativo y de portafolio del proyecto; no
+se plantean como una solución universal para aplicaciones de cualquier tamaño.
 
 ## Limitaciones actuales
 
-- No hay autenticación ni separación de tareas por usuario.
-- No existe API REST.
-- `init-db` recrea el esquema y debe utilizarse solo para inicialización local.
-- No hay rollback automático de migraciones.
-- No hay contenedores ni despliegue cloud configurado.
-- La interfaz se mantiene ligera y sin framework CSS ni JavaScript complejo.
+- No incluye autenticación ni separación de tareas por usuario.
+- No expone una API pública.
+- No dispone todavía de Docker ni despliegue público.
+- Las migraciones son forward-only y no almacenan checksums.
+- La accesibilidad se prueba mediante aserciones HTML, sin auditoría WCAG automática.
+- Los errores CSRF utilizan la respuesta estándar de Flask-WTF.
 
-## Roadmap
+## Posibles mejoras futuras
 
-- Ampliar el historial de migraciones a medida que el esquema evolucione.
-- Mejorar accesibilidad y experiencia visual sin alterar la arquitectura.
-- Definir una estrategia de despliegue y configuración de producción.
-- Evaluar autenticación únicamente si el alcance futuro lo requiere.
+- Publicar una instancia demostrativa con configuración de despliegue documentada.
+- Evaluar autenticación si el alcance requiere tareas por usuario.
+- Diseñar una API pública manteniendo separada la persistencia.
+- Incorporar Docker para un entorno reproducible de ejecución.
+- Automatizar auditorías de accesibilidad y ampliar la estrategia de migraciones.
+
+## Autor
+
+**Marcelo Molina**
+
+Ingeniero en Informática
+
+[GitHub](https://github.com/MarceloGMM3)
+
+## Licencia
+
+Este proyecto se distribuye bajo la [Licencia MIT](LICENSE).
