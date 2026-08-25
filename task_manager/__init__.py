@@ -8,6 +8,7 @@ from flask_wtf.csrf import CSRFProtect
 from task_manager.config import Config
 from task_manager.db import init_app as init_db_app
 from task_manager.errors import register_error_handlers
+from task_manager.migrations import init_app as init_migrations_app
 from task_manager.tasks import bp as tasks_bp
 
 csrf = CSRFProtect()
@@ -25,6 +26,7 @@ def create_app(test_config: dict[str, object] | None = None) -> Flask:
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     csrf.init_app(app)
     init_db_app(app)
+    init_migrations_app(app)
     app.register_blueprint(tasks_bp)
     register_error_handlers(app)
 

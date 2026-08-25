@@ -32,7 +32,7 @@ def close_db(error: BaseException | None = None) -> None:
 
 
 def init_db() -> None:
-    """Create database objects declared in schema.sql."""
+    """Destructively create the current schema declared in schema.sql."""
     schema_path = Path(__file__).with_name("schema.sql")
     get_db().executescript(schema_path.read_text(encoding="utf-8"))
 
@@ -40,9 +40,9 @@ def init_db() -> None:
 @click.command("init-db")
 @with_appcontext
 def init_db_command() -> None:
-    """Initialize the configured SQLite database."""
+    """Initialize or reset the configured development database."""
     init_db()
-    click.echo("Initialized the database.")
+    click.echo("Initialized the database. Existing data was reset.")
 
 
 def init_app(app: Flask) -> None:

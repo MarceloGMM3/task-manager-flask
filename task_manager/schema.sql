@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS schema_migrations;
 
 CREATE TABLE task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -9,4 +10,12 @@ CREATE TABLE task (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_task_is_completed ON task (is_completed);
+CREATE INDEX IF NOT EXISTS idx_task_listing
+ON task (is_completed ASC, created_at DESC, id DESC);
+
+CREATE TABLE schema_migrations (
+    version TEXT PRIMARY KEY,
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO schema_migrations (version) VALUES ('0001_optimize_task_listing');
